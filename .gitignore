@@ -164,3 +164,4 @@ cython_debug/
 .vs
 /.env
 credentials.json
+token.json
