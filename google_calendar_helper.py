@@ -7,6 +7,14 @@ from googleapiclient.discovery import build
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 class GoogleCalendarHelper:
+    """
+    Helper class to manage Google Calendar events.
+    """
+
+    # Add required attributes for OpenAI SDK compatibility
+    name = "google_calendar_helper"
+    description = "Manage Google Calendar events, including creating, updating, and deleting events."
+
     def __init__(self, credentials_path="credentials.json", token_path="token.json"):
         self.credentials_path = credentials_path
         self.token_path = token_path
@@ -25,7 +33,18 @@ class GoogleCalendarHelper:
 
         return build("calendar", "v3", credentials=creds)
 
-    def create_event(self, summary, start_time, end_time, description="", attendees=None):
+    def create_event(self, event_details: dict):
+        """
+        Create a calendar event.
+        :param event_details: A dictionary containing event details.
+        :return: A success message or error.
+        """
+        summary = event_details.get("summary")
+        start_time = event_details.get("start_time")
+        end_time = event_details.get("end_time")
+        description = event_details.get("description", "")
+        attendees = event_details.get("attendees", [])
+
         event = {
             "summary": summary,
             "description": description,
@@ -34,7 +53,7 @@ class GoogleCalendarHelper:
             "attendees": [{"email": email} for email in attendees] if attendees else [],
         }
         event = self.service.events().insert(calendarId="primary", body=event).execute()
-        return event.get("htmlLink")
+        return "Event created successfully."
 
     def list_events(self, max_results=5):
         now = datetime.datetime.utcnow().isoformat() + "Z"
@@ -44,22 +63,37 @@ class GoogleCalendarHelper:
         events = events_result.get("items", [])
         return events
     
-    def update_event(self, event_id, summary=None, start_time=None, end_time=None, description=None, attendees=None):
+    def update_event(self, event_id: str, updated_details: dict):
+        """
+        Update an existing calendar event.
+        :param event_id: The ID of the event to update.
+        :param updated_details: A dictionary containing updated event details.
+        :return: A success message or error.
+        """
         event = self.service.events().get(calendarId="primary", eventId=event_id).execute()
 
         # Update fields if provided
-        if summary:
-            event["summary"] = summary
-        if start_time and end_time:
-            event["start"] = {"dateTime": start_time, "timeZone": "UTC"}
-            event["end"] = {"dateTime": end_time, "timeZone": "UTC"}
-        if description:
-            event["description"] = description
-        if attendees:
-            event["attendees"] = [{"email": email} for email in attendees]
+        if "summary" in updated_details:
+            event["summary"] = updated_details["summary"]
+        if "start_time" in updated_details and "end_time" in updated_details:
+            event["start"] = {"dateTime": updated_details["start_time"], "timeZone": "UTC"}
+            event["end"] = {"dateTime": updated_details["end_time"], "timeZone": "UTC"}
+        if "description" in updated_details:
+            event["description"] = updated_details["description"]
+        if "attendees" in updated_details:
+            event["attendees"] = [{"email": email} for email in updated_details["attendees"]]
 
         updated_event = self.service.events().update(calendarId="primary", eventId=event_id, body=event).execute()
-        return updated_event
+        return "Event updated successfully."
+
+    def delete_event(self, event_id: str):
+        """
+        Delete a calendar event.
+        :param event_id: The ID of the event to delete.
+        :return: A success message or error.
+        """
+        self.service.events().delete(calendarId="primary", eventId=event_id).execute()
+        return "Event deleted successfully."
 
     def test_google_calendar_auth(self):
         creds = None
