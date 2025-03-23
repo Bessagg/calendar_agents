@@ -43,6 +43,7 @@ To use the Google Calendar API, follow these steps to obtain the `credentials.js
 ## Whatsap Setup
 
 - Refer to [Daveebbelaar - Python Whatssap Bot repo](https://github.com/daveebbelaar/python-whatsapp-bot/tree/main)
+- To obtain a non-expiring token for whatsapp api [Link](https://stackoverflow.com/questions/72685327/how-to-get-permanent-token-for-using-whatsapp-cloud-api)
 
 ### Get Started
 

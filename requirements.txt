@@ -7,3 +7,7 @@ google-api-python-client
 langchain
 dotenv
 langchain-openai
+aiohttp
+uvicorn
+# fastpi
+flask
